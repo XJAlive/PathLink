@@ -15,6 +15,9 @@ class AppPathLinkUtils {
     companion object {
         var pathRouter = HashMap<String, PathMeta>()
 
+        /**
+         * 初始化PathLink组件相关业务，生成路由表
+         */
         @JvmStatic
         fun init() {
             try {
@@ -44,6 +47,7 @@ class AppPathLinkUtils {
     fun handlerUrl(context: Context?, url: String) {
         try {
             val uri = Uri.parse(url)
+            //匹配路由表，找到调用对应方法需要的所有信息
             val pathMeta = pathRouter[uri.host] ?: return
             val className = pathMeta.path
             if (className == null || className.isEmpty()) {
@@ -55,33 +59,20 @@ class AppPathLinkUtils {
             }
             val clazz = Class.forName(className)
 
-//            Constructor<?>[] constructors = clazz.getConstructors();
-//            for (Constructor constructor : constructors) {
-//                String constructorName = constructor.getName();
-//                System.out.print(constructorName + "(");
-//                //获得构造函数的所有参数
-//                Class[] classType = constructor.getParameterTypes();
-//                for (int i = 0; i < classType.length; i++) {
-//                    if (i == classType.length - 1) {
-//                        System.out.print(classType[i].getName());
-//                    } else {
-//                        System.out.print(classType[i].getName() + ",");
-//                    }
-//                }
-//                System.out.println(")");
-//            }
             for (method in clazz.declaredMethods) {
                 if (method.name != pathMeta.methodName) {
                     continue
                 }
 
+                //获取该方法需要的所有参数名称和顺序
                 val array = pathMeta.parameter.split(",").filter { !it.isBlank() }
                 if (array.isNullOrEmpty()) {
-                    //直接调用无参方法
+                    //反射调用无参方法
                     method.invoke(clazz.newInstance())
                 } else {
                     val parameterList = mutableListOf<Any>()
                     for (parameter in array) {
+                        //从Scheme中获取前端传过来的值
                         val value = uri.getQueryParameter(parameter)
                         if (!value.isNullOrBlank()) {
                             parameterList.add(value)
@@ -89,8 +80,10 @@ class AppPathLinkUtils {
                     }
 
                     if (isDeliverContext(method)) {
+                        //如果需要用到Context，请把Context作为方法的第一个参数!!!!
                         context?.let { parameterList.add(0, it) }
                     }
+                    //反射调用有参方法
                     method.invoke(clazz.newInstance(), *parameterList.toTypedArray())
                 }
             }
