@@ -1,0 +1,4 @@
+include ':app'
+include ':path-compiler'
+include ':path-annotation'
+rootProject.name = "PathLink"
