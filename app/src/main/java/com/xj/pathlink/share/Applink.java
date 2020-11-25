@@ -8,7 +8,7 @@ import cn.mama.com.LinkPath;
  */
 public class Applink {
 
-    @LinkPath(value = "")
+    @LinkPath(alias = "")
     public static void add(String i) {
         Log.i("xj", "------->反射调用了add方法,传参i=" + i);
     }

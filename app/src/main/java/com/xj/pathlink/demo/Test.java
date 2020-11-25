@@ -8,7 +8,7 @@ import cn.mama.com.LinkPath;
  */
 public class Test {
 
-    @LinkPath(value = "print1")
+    @LinkPath(alias = "print1")
     public void print() {
         Log.i("xj", "--->调用了print方法");
     }

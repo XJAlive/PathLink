@@ -9,7 +9,7 @@ import cn.mama.com.LinkPath
  */
 class Demo {
 
-    @LinkPath(value = "showToast1")
+    @LinkPath(alias = "showToast1")
     fun showToast(context: Context, value: String) {
         Toast.makeText(context, "成功调用了showToast", Toast.LENGTH_SHORT).show()
     }

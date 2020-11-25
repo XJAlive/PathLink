@@ -8,7 +8,7 @@ import cn.mama.com.LinkPath;
 
 public class SecondActivity extends AppCompatActivity {
 
-    @LinkPath(value = "jump2Second")
+    @LinkPath(alias = "jump2Second")
     public static void invoke(Context context) {
         Intent intent = new Intent(context, SecondActivity.class);
         context.startActivity(intent);

@@ -7,6 +7,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -24,9 +25,10 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
-import javax.tools.Diagnostic.Kind;
+import javax.tools.Diagnostic;
 
 /**
+ * LinkPath注解处理器
  * Created by xiej on 2020/11/18
  */
 @AutoService(Processor.class)
@@ -62,6 +64,8 @@ public class PathLinkProcessor extends AbstractProcessor {
 
         methodSpecBuilder.addStatement("PathMeta pathMeta");
 
+        List<String> methodNames = new ArrayList<>();
+
         for (Element element : roundEnvironment.getElementsAnnotatedWith(LinkPath.class)) {
 
             String methodName = element.getSimpleName().toString();
@@ -71,9 +75,9 @@ public class PathLinkProcessor extends AbstractProcessor {
             ExecutableElement executableElement = (ExecutableElement) element;
             List<? extends VariableElement> variableElement = executableElement.getParameters();
             for (int i = 0; i < variableElement.size(); i++) {
-                mMessager.printMessage(Kind.NOTE,
-                    "方法" + executableElement.getSimpleName() + "->参数" + variableElement.get(i)
-                        .getSimpleName());
+//                mMessager.printMessage(Kind.NOTE,
+//                    "方法" + executableElement.getSimpleName() + "->参数" + variableElement.get(i)
+//                        .getSimpleName());
                 sb.append(variableElement.get(i));
                 sb.append(",");
             }
@@ -84,10 +88,21 @@ public class PathLinkProcessor extends AbstractProcessor {
             methodSpecBuilder.addStatement("pathMeta.setMethodName($S)", methodName);//保存原方法名
 
             LinkPath annotation = element.getAnnotation(LinkPath.class);
-            if (!annotation.value().isEmpty()) {
-                methodName = annotation.value();
+            if (!annotation.alias().isEmpty()) {
+                methodName = annotation.alias();
             }
 
+            //唯一性校验
+            if (methodNames.contains(methodName)) {
+                mMessager.printMessage(Diagnostic.Kind.WARNING,
+                    String.format(
+                        "-------------------项目中存在多个%s()方法，构建PathLink失败-------------------",
+                        methodName));
+
+                return true;
+            }
+
+            methodNames.add(methodName);
             //生成路由表key=别名，value=PathMeta()
             methodSpecBuilder.addStatement(
                 "map.put($S, pathMeta)",

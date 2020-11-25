@@ -15,5 +15,5 @@ public @interface LinkPath {
     /**
      * 设置别名
      */
-    String value();
+    String alias();
 }
