@@ -23,7 +23,7 @@ Scheme方式调用方法、唤起app/页面(q://update?value=1)
 ```
 public class Test {
 
-    @LinkPath(value = "print1")
+    @LinkPath(alias = "print1")
     public void print() {
         Log.i("xj", "--->调用了print方法");
     }
