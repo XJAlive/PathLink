@@ -67,9 +67,9 @@ public class PathLinkProcessor extends AbstractProcessor {
         List<String> methodNames = new ArrayList<>();
 
         for (Element element : roundEnvironment.getElementsAnnotatedWith(LinkPath.class)) {
-
+            ClassName className = ClassName.get((TypeElement) element.getEnclosingElement());
             String methodName = element.getSimpleName().toString();
-            String className = element.getEnclosingElement().toString();
+            String path = element.getEnclosingElement().toString();
 
             StringBuilder sb = new StringBuilder();
             ExecutableElement executableElement = (ExecutableElement) element;
@@ -83,7 +83,8 @@ public class PathLinkProcessor extends AbstractProcessor {
             }
 
             methodSpecBuilder.addStatement("pathMeta = new PathMeta()");
-            methodSpecBuilder.addStatement("pathMeta.setPath($S)", className);
+            methodSpecBuilder.addStatement("pathMeta.setPath($S)", path);
+            methodSpecBuilder.addStatement("pathMeta.setClassName($T.class)", className);
             methodSpecBuilder.addStatement("pathMeta.setParameter($S)", sb.toString());
             methodSpecBuilder.addStatement("pathMeta.setMethodName($S)", methodName);//保存原方法名
 
